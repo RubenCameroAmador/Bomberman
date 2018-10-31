@@ -8,7 +8,9 @@ Game.preload = function () {
     this.load.spritesheet('dude', 'assets/linkf.png', { frameWidth: (165/8), frameHeight: 31 });
 };
 var phaserGuy
+
 Game.create = function () {
+    
     phaserGuy = this.physics.add.sprite(32, 32, 'dude', 4);
     phaserGuy.setDepth(1);
     phaserGuy.setOrigin(0, 0.5);
@@ -18,10 +20,12 @@ Game.create = function () {
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
     var tiles = Game.map.addTilesetImage('tiles', 'tileset');
+    
     Game.map.createStaticLayer(0, tiles, 0, 0);
+
     cursors = this.input.keyboard.createCursorKeys();
+
     //Animaciones:
-    this.physics.add.collider(phaserGuy,tiles);
     this.anims.create({
         key: 'left',
         frames: this.anims.generateFrameNumbers('dude', {
@@ -72,7 +76,6 @@ Game.create = function () {
     });
 
 }
-
 Game.update = function () {
     if (cursors.left.isDown) {
         phaserGuy.setVelocityX(-90);
