@@ -1,27 +1,51 @@
 var Game = {};
 
 Game.preload = function () {
+    
     Game.scene = this; // Handy reference to the scene (alternative to `this` binding)
+    
+    //Game.load.tilemap('map', 'assets/mapa.json', null, Phaser.Tilemap.TILED_JSON);
     this.load.image('tileset', 'assets/gridtiles.png');
+
+
+    
     this.load.tilemapTiledJSON('map', 'assets/map.json');
-    this.load.image('phaserguy', 'assets/phaserguy.png');
+
     this.load.spritesheet('dude', 'assets/linkf.png', { frameWidth: (165/8), frameHeight: 31 });
+
+    
 };
 var phaserGuy
+var map
+var layer
+var aux
+var blocks
 
 Game.create = function () {
     
+    
+    // Display map
+    
+    
+    map = this.add.tilemap('map',32,32);
+
+    aux= map.addTilesetImage('gridtiles','tileset');
+    layer = map.createStaticLayer('ground',aux);
+    blocks = map.createStaticLayer('blocks',aux);
+    
+    blocks.setCollisionBetween(0,999,true);
+    layer.debug = true;
+
     phaserGuy = this.physics.add.sprite(32, 32, 'dude', 4);
     phaserGuy.setDepth(1);
     phaserGuy.setOrigin(0, 0.5);
-    phaserGuy.setCollideWorldBounds(true);
-    // Display map
-    Game.map = Game.scene.make.tilemap({ key: 'map' });
+    phaserGuy.setCollideWorldBounds(true); //colision con bordes
+
     // The first parameter is the name of the tileset in Tiled and the second parameter is the key
     // of the tileset image used when loading the file in preload.
-    var tiles = Game.map.addTilesetImage('tiles', 'tileset');
+    //var tiles = Game.map.addTilesetImage('tiles', 'tileset');
     
-    Game.map.createStaticLayer(0, tiles, 0, 0);
+    //Game.map.createStaticLayer(0, tiles, 0, 0);
 
     cursors = this.input.keyboard.createCursorKeys();
 
@@ -75,8 +99,13 @@ Game.create = function () {
         repeat: -1
     });
 
+    this.physics.add.collider(phaserGuy, blocks);
+
 }
 Game.update = function () {
+
+    //this.physics.arcade.collider(phaserGuy, layer);
+
     if (cursors.left.isDown) {
         phaserGuy.setVelocityX(-90);
         phaserGuy.setVelocityY(0);
