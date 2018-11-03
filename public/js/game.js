@@ -5,14 +5,14 @@ Game.preload = function () {
     Game.scene = this; // Handy reference to the scene (alternative to `this` binding)
     
     //Game.load.tilemap('map', 'assets/mapa.json', null, Phaser.Tilemap.TILED_JSON);
-    this.load.image('tileset', 'assets/gridtiles.png');
+    this.load.image('tileset', 'assets/forest.png');
 
 
     
-    this.load.tilemapTiledJSON('map', 'assets/map.json');
+    this.load.tilemapTiledJSON('map', 'assets/island.json');
 
-    this.load.spritesheet('dude', 'assets/linkf.png', { frameWidth: (165/8), frameHeight: 31 });
-
+    this.load.spritesheet('dude', 'assets/link40.png', { frameWidth: (200/5), frameHeight: 160/4 });
+    
     
 };
 var phaserGuy
@@ -26,10 +26,15 @@ Game.create = function () {
     
     // Display map
     
-    
-    map = this.add.tilemap('map',32,32);
+    /* // Start the P2 Physics Engine
+    this.game.physics.startSystem(Phaser.Physics.P2JS);
 
-    aux= map.addTilesetImage('gridtiles','tileset');
+    // Set the gravity
+    this.game.physics.p2.gravity.y = 0; */
+
+    map = this.add.tilemap('map',35,35);
+
+    aux= map.addTilesetImage('forest','tileset');
     layer = map.createStaticLayer('ground',aux);
     blocks = map.createStaticLayer('blocks',aux);
     
@@ -54,7 +59,7 @@ Game.create = function () {
         key: 'left',
         frames: this.anims.generateFrameNumbers('dude', {
             start: 0,
-            end: 7
+            end: 4
         }),
         frameRate: 10,
         repeat: -1
@@ -64,7 +69,7 @@ Game.create = function () {
         key: 'turn',
         frames: [{
             key: 'dude',
-            frame: 24
+            frame: 15
         }],
         frameRate: 20
     });
@@ -72,8 +77,8 @@ Game.create = function () {
     this.anims.create({
         key: 'right',
         frames: this.anims.generateFrameNumbers('dude', {
-            start: 8,
-            end: 15
+            start: 5,
+            end: 9
         }),
         frameRate: 10,
         repeat: -1
@@ -82,8 +87,8 @@ Game.create = function () {
     this.anims.create({
         key: 'up',
         frames: this.anims.generateFrameNumbers('dude', {
-            start: 16,
-            end: 23
+            start: 10,
+            end: 14
         }),
         frameRate: 10,
         repeat: -1
@@ -92,8 +97,8 @@ Game.create = function () {
     this.anims.create({
         key: 'down',
         frames: this.anims.generateFrameNumbers('dude', {
-            start: 24,
-            end: 31
+            start: 15,
+            end: 19
         }),
         frameRate: 10,
         repeat: -1
