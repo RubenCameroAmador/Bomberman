@@ -11,26 +11,25 @@ Game.preload = function () {
     
     this.load.tilemapTiledJSON('map', 'assets/island.json');
 
-    this.load.spritesheet('dude', 'assets/link40.png', { frameWidth: (200/5), frameHeight: 160/4 });
-    
-    
+    this.load.spritesheet('dude', 'assets/linkfin.png', { frameWidth: (135/8), frameHeight: (101/4) });
+    this.load.spritesheet('bomb', 'assets/bomb.png', { frameWidth: (106/4), frameHeight: 25 });
+    this.load.spritesheet('boom', 'assets/explosion.png', { frameWidth: (512/4), frameHeight: (512/4) });
 };
 var phaserGuy
 var map
 var layer
 var aux
 var blocks
+var spacekey
+var bombs
+var mirando="espera"
+var explosion
+
 
 Game.create = function () {
     
     
-    // Display map
     
-    /* // Start the P2 Physics Engine
-    this.game.physics.startSystem(Phaser.Physics.P2JS);
-
-    // Set the gravity
-    this.game.physics.p2.gravity.y = 0; */
 
     map = this.add.tilemap('map',35,35);
 
@@ -40,17 +39,16 @@ Game.create = function () {
     
     blocks.setCollisionBetween(0,999,true);
     layer.debug = true;
-
-    phaserGuy = this.physics.add.sprite(32, 32, 'dude', 4);
-    phaserGuy.setDepth(1);
-    phaserGuy.setOrigin(0, 0.5);
+    phaserGuy = this.physics.add.sprite(35+16, 35+16, 'dude', 24);
     phaserGuy.setCollideWorldBounds(true); //colision con bordes
 
-    // The first parameter is the name of the tileset in Tiled and the second parameter is the key
-    // of the tileset image used when loading the file in preload.
-    //var tiles = Game.map.addTilesetImage('tiles', 'tileset');
-    
-    //Game.map.createStaticLayer(0, tiles, 0, 0);
+    spacekey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+    bombs = this.add.group();
+    bombs.enableBody = true;
+    bombs.physicsBodyType = Phaser .Physics.ARCADE;
+
+    explosion = this.physics.add.sprite((15*35)/2, (15*35)/2, 'boom',0);
 
     cursors = this.input.keyboard.createCursorKeys();
 
@@ -59,26 +57,19 @@ Game.create = function () {
         key: 'left',
         frames: this.anims.generateFrameNumbers('dude', {
             start: 0,
-            end: 4
+            end: 7
         }),
         frameRate: 10,
         repeat: -1
     });
 
-    this.anims.create({
-        key: 'turn',
-        frames: [{
-            key: 'dude',
-            frame: 15
-        }],
-        frameRate: 20
-    });
+    
 
     this.anims.create({
         key: 'right',
         frames: this.anims.generateFrameNumbers('dude', {
-            start: 5,
-            end: 9
+            start: 8,
+            end: 15
         }),
         frameRate: 10,
         repeat: -1
@@ -87,8 +78,8 @@ Game.create = function () {
     this.anims.create({
         key: 'up',
         frames: this.anims.generateFrameNumbers('dude', {
-            start: 10,
-            end: 14
+            start: 16,
+            end: 23
         }),
         frameRate: 10,
         repeat: -1
@@ -97,39 +88,95 @@ Game.create = function () {
     this.anims.create({
         key: 'down',
         frames: this.anims.generateFrameNumbers('dude', {
-            start: 15,
-            end: 19
+            start: 24,
+            end: 35
         }),
         frameRate: 10,
         repeat: -1
     });
 
-    this.physics.add.collider(phaserGuy, blocks);
+    this.anims.create({
+        key: 'bombmov',
+        frames: this.anims.generateFrameNumbers('bomb', {
+            start: 0,
+            end: 3
+        }),
+        frameRate: 10,
+        repeat: -1
+    });
 
+    this.anims.create({
+        key: 'explode',
+        frames: this.anims.generateFrameNumbers('boom', {
+            start: 0,
+            end: 13
+        }),
+        frameRate: 10,
+        repeat: -1
+    });
+    this.physics.add.collider(phaserGuy, blocks);
+    
+
+}
+
+function createBomb(){
+
+    bombs.create(phaserGuy.x, phaserGuy.y,'bomb');
+
+    
 }
 Game.update = function () {
 
-    //this.physics.arcade.collider(phaserGuy, layer);
+    explosion.anims.play('explode',true);
 
-    if (cursors.left.isDown) {
-        phaserGuy.setVelocityX(-90);
-        phaserGuy.setVelocityY(0);
-        phaserGuy.anims.play('left', true);
-    } else if (cursors.right.isDown) {
+    bombs.children.iterate(function (child) {
+
+        child.anims.play('bombmov',true);
+    
+    });
+    //bombs.anims.play('explode', true);
+
+    if (cursors.right.isDown) {
         phaserGuy.setVelocityX(90);
         phaserGuy.setVelocityY(0);
         phaserGuy.anims.play('right', true);
-    }else if(cursors.up.isDown){
+        if (mirando != "right") {
+            mirando = "right";
+        }
+    } else if (cursors.left.isDown) {
+        phaserGuy.setVelocityX(-90);
+        phaserGuy.setVelocityY(0);
+        phaserGuy.anims.play('left', true);
+        if (mirando != "left") {
+            mirando = "left";
+        }
+    } else if (cursors.up.isDown) {
         phaserGuy.setVelocityY(-90)
         phaserGuy.setVelocityX(0);
         phaserGuy.anims.play('up', true);
-    }else if(cursors.down.isDown){
+        if (mirando != "up") {
+            mirando = "up";
+        }
+    } else if (cursors.down.isDown) {
         phaserGuy.setVelocityY(90)
         phaserGuy.setVelocityX(0);
         phaserGuy.anims.play('down', true);
+        if (mirando != "down") {
+            mirando = "down";
+        }
     } else {
-        phaserGuy.setVelocityX(0);
-        phaserGuy.setVelocityY(0);
-        phaserGuy.anims.play('turn');
+        if (mirando != "espera") {
+            phaserGuy.anims.stop();
+            phaserGuy.setVelocityX(0);
+            phaserGuy.setVelocityY(0);
+
+        }
+        mirando = "right";
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(spacekey))
+    {
+        createBomb()
     }
 }
+
