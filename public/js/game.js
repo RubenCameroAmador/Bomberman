@@ -1,19 +1,19 @@
 var Game = {};
 
 Game.preload = function () {
-    
+
     Game.scene = this; // Handy reference to the scene (alternative to `this` binding)
-    
+
     //Game.load.tilemap('map', 'assets/mapa.json', null, Phaser.Tilemap.TILED_JSON);
     this.load.image('tileset', 'assets/forest.png');
 
 
-    
+
     this.load.tilemapTiledJSON('map', 'assets/island.json');
 
-    this.load.spritesheet('dude', 'assets/linkfin.png', { frameWidth: (135/8), frameHeight: (101/4) });
-    this.load.spritesheet('bomb', 'assets/bomb.png', { frameWidth: (106/4), frameHeight: 25 });
-    this.load.spritesheet('boom', 'assets/explosion.png', { frameWidth: (512/4), frameHeight: (512/4) });
+    this.load.spritesheet('dude', 'assets/linkfin.png', { frameWidth: (135 / 8), frameHeight: (101 / 4) });
+    this.load.spritesheet('bomb', 'assets/imagen/bomba.png', { frameWidth: (35), frameHeight: 35 });
+    this.load.spritesheet('boom', 'assets/explosion.png', { frameWidth: (512 / 4), frameHeight: (512 / 4) });
 };
 var phaserGuy
 var map
@@ -22,33 +22,34 @@ var aux
 var blocks
 var spacekey
 var bombs
-var mirando="espera"
+var mirando = "espera"
 var explosion
+var sw
 
 
 Game.create = function () {
-    
-    
-    
 
-    map = this.add.tilemap('map',35,35);
 
-    aux= map.addTilesetImage('forest','tileset');
-    layer = map.createStaticLayer('ground',aux);
-    blocks = map.createStaticLayer('blocks',aux);
-    
-    blocks.setCollisionBetween(0,999,true);
+
+
+    map = this.add.tilemap('map', 35, 35);
+
+    aux = map.addTilesetImage('forest', 'tileset');
+    layer = map.createStaticLayer('ground', aux);
+    blocks = map.createStaticLayer('blocks', aux);
+
+    blocks.setCollisionBetween(0, 999, true);
     layer.debug = true;
-    phaserGuy = this.physics.add.sprite(35+16, 35+16, 'dude', 24);
+    phaserGuy = this.physics.add.sprite(35 + 16, 35 + 16, 'dude', 24);
     phaserGuy.setCollideWorldBounds(true); //colision con bordes
 
     spacekey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
     bombs = this.add.group();
     bombs.enableBody = true;
-    bombs.physicsBodyType = Phaser .Physics.ARCADE;
+    bombs.physicsBodyType = Phaser.Physics.ARCADE;
 
-    explosion = this.physics.add.sprite((15*35)/2, (15*35)/2, 'boom',0);
+    //explosion = this.physics.add.sprite((15*35)/2, (15*35)/2, 'boom',0);
 
     cursors = this.input.keyboard.createCursorKeys();
 
@@ -63,7 +64,7 @@ Game.create = function () {
         repeat: -1
     });
 
-    
+
 
     this.anims.create({
         key: 'right',
@@ -99,10 +100,9 @@ Game.create = function () {
         key: 'bombmov',
         frames: this.anims.generateFrameNumbers('bomb', {
             start: 0,
-            end: 3
+            end: 13
         }),
-        frameRate: 10,
-        repeat: -1
+        frameRate: 5,
     });
 
     this.anims.create({
@@ -115,25 +115,57 @@ Game.create = function () {
         repeat: -1
     });
     this.physics.add.collider(phaserGuy, blocks);
-    
+
 
 }
 
-function createBomb(){
+function createBomb() {
 
-    bombs.create(phaserGuy.x, phaserGuy.y,'bomb');
+    bombs.create(phaserGuy.x, phaserGuy.y, 'bomb');
 
-    
 }
-Game.update = function () {
+/* function exploitBomb(){
+    var _timerExploitBomb = this.game.time.create(false);
+    _timerExploitBomb.seconds = 0;
 
-    explosion.anims.play('explode',true);
+    _timerExploitBomb.loop(1000, function()){
+        this.timers[3].seconds++;
+        if(this._timers[3].seconds>=3){
+            this._timers[3].seconds =0;
+            this._timers[3].stop(false);
+        }   
+    }, this);
+    this._timers.push(timerPutBomb, _timerExploitBomb);
+} */
 
+var time = 0;
+var swTap = false;
+
+function increaseTime() {
+    time++;
+    console.log(time);
+}
+
+function exploitBomb(){
     bombs.children.iterate(function (child) {
 
-        child.anims.play('bombmov',true);
-    
+        child.destroy();
+
     });
+}
+
+Game.update = function () {
+
+
+
+    if (sw == true) {
+        bombs.children.iterate(function (child) {
+
+            child.anims.play('bombmov', true);
+
+        });
+        sw = false;
+    }
     //bombs.anims.play('explode', true);
 
     if (cursors.right.isDown) {
@@ -173,10 +205,32 @@ Game.update = function () {
         }
         mirando = "right";
     }
+    var size = 0
+    if (Phaser.Input.Keyboard.JustDown(spacekey)) {
+        sw = true
 
-    if (Phaser.Input.Keyboard.JustDown(spacekey))
-    {
-        createBomb()
+        swTap = true;
+
+        bombs.children.iterate(function (child) {
+
+            size += 1;
+
+        });
+        if (size == 0) {
+            createBomb()
+            time = 0;
+        }
+
     }
+
+    if (time < 180 && swTap == true) {
+        increaseTime()
+    } else {
+        swTap = false;
+        exploitBomb();
+    }
+
+
 }
+
 
